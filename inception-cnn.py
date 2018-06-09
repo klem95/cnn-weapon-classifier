@@ -1,12 +1,14 @@
 from keras.preprocessing.image import ImageDataGenerator
 from keras.preprocessing import image
 from keras import optimizers
+import keras
 from keras.models import Sequential, Model
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
 from keras import backend as K
 import numpy as np
 from keras import applications
+from keras import regularizers
 from keras.applications.inception_v3 import preprocess_input, decode_predictions
 import matplotlib.pyplot as plt
 
@@ -28,15 +30,20 @@ if K.image_data_format() == 'channels_first':
 else:
     input_shape = (img_h, img_w, 3)
 
+best_model = keras.callbacks.ModelCheckpoint('best_weight_inception' + '.h5', monitor='val_acc', save_best_only=True)
+reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='loss', factor=0.25, patience=20, min_lr=0.000005)
+
 
 def compileModel():
     model = applications.InceptionV3(include_top=False, input_shape=input_shape, weights='imagenet')
     x = model.output
     x = Flatten()(x) # flattening output from
     # adding a fully connected layer to InceptionV3
-    x = Dense(256, activation='relu')(x)
-    # Connecting to a 4 class dense layer, using softmax for prediction
-    predictions = Dense(4, activation='softmax')(x)
+    x = Dense(256, activation='relu', kernel_regularizer=regularizers.l2(0.1))(x)
+
+    x = Dropout(0.5)(x)
+    # Connecting to a 4 clxass dense layer, using softmax for prediction
+    predictions = Dense(4, activation='softmax', kernel_regularizer=regularizers.l2(0.1))(x)
 
     train_model = Model(inputs=model.input, outputs=predictions) #creating a new model, with v3 as input and our dense as output
 
@@ -86,10 +93,12 @@ def train_model(input_model):
         steps_per_epoch=train_sample_size // batch_size,
         epochs=epochs,
         validation_data= validation_generator,
-        nb_val_samples = 50)
+        nb_val_samples = 50,
+        callbacks = [best_model, reduce_lr]
+    )
 
     plotVal_plotLoss(hist)
-    input_model.save_weights('inceptionV3Weights.h5')
+    input_model.save_weights('inceptionV3Weights2.h5')
 
     #validation_steps=nb_validation_samples // batch_size)
 
@@ -120,13 +129,13 @@ def predictImg(path, model):
     #x = preprocess_input(x)
     x = np.expand_dims(x, axis=0)
     prediction = model.predict(x)
-    findLabel(prediction, 0.85, path)
+    findLabel(prediction, 0.3, path)
     print(prediction)
 
 
 def findLabel(test, threshold, path):
     if (max(test[0]) < threshold):
-        print("no class could be defined for " + path + " with threshold 0.85")
+        print("no class could be defined for " + path + " with threshold 0.30")
     else:
         m = max(test[0])
         index = [i for i, j in enumerate(list(test[0])) if j == m]
@@ -139,25 +148,41 @@ def labeler(inp, pathname):
     return 0
 
 
-train_model(compileModel())
+#train_model(compileModel())
 
 np.set_printoptions(suppress=True, precision=3)
 model = compileModel()
-#model.load_weights('inceptionV3Weights.h5')
+model.load_weights('best_weight_inception.h5')
 
 predictImg(prediction_data_dir + '/hud.PNG', model) #  ansigt
 predictImg(prediction_data_dir + '/ikke-gun.jpg', model) # ansigter
-predictImg(prediction_data_dir + '/rifle.jpeg', model) # Rifle
-predictImg(prediction_data_dir + '/59kspz.jpg', model) # Kniv
 
-predictImg(prediction_data_dir + '/gun_m_hand.jpg', model) # Gun
-predictImg(prediction_data_dir + '/gun_u_hand.jpg', model) # Gun
 
+predictImg(prediction_data_dir + '/59kspz.jpg', model) # Knife
 predictImg(prediction_data_dir + '/standart_knive.jpg', model) # knive
 predictImg(prediction_data_dir + '/hunter_knive.jpg', model) # knive
 predictImg(prediction_data_dir + '/knive_m_hand.png', model) # knive
 
+predictImg(prediction_data_dir + '/gun_m_hand.jpg', model) # Gun
+predictImg(prediction_data_dir + '/gun_u_hand.jpg', model) # Gun
+
+
+predictImg(prediction_data_dir + '/rifleman.jpg', model) # Rifle
+predictImg(prediction_data_dir + '/rifle.jpeg', model) # Rifle
 predictImg(prediction_data_dir + '/ak_rifle.jpg', model) # Rifle
 predictImg(prediction_data_dir + '/rifle_m_man.jpg', model) # Rifle
 
+predictImg(prediction_data_dir + '/rifle_m_man.jpg', model) # Rifle
+
+predictImg(prediction_data_dir + '/IMG_9186.JPG', model) # Rifle
+
+
 np.set_printoptions(suppress=False, precision=10)
+
+
+
+
+#early_stop = keras.callbacks.EarlyStopping(monitor='val_acc', min_delta=0, patience=self.patience, verbose=0, mode='auto')
+
+
+
