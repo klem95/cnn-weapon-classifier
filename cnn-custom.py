@@ -1,6 +1,6 @@
 from keras.preprocessing.image import ImageDataGenerator
 from keras.preprocessing import image
-from keras import optimizers
+from keras import optimizers, regularizers
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D
 from keras.layers import Activation, Dropout, Flatten, Dense
@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from keras.applications.inception_v3 import preprocess_input, decode_predictions
-import keras;
+import keras
 
 # dimensions of our images.
 img_width, img_height = 150, 150
@@ -31,6 +31,9 @@ epochs = 100
 batch_size = 12 # The batch size represents the total amount of pictures that are included in each iteration.
 
 
+best_model = keras.callbacks.ModelCheckpoint('custom_w_supervision_try' + '.h5', monitor='val_acc',save_best_only=True)
+reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='loss',factor=0.25, patience=20,min_lr=0.000005)
+
 def compileModel():
     print("compiling model")
 
@@ -42,33 +45,31 @@ def compileModel():
 
     # Defining the architecture of the model
     model = Sequential()
-    model.add(Conv2D(64, (3, 3), input_shape=input_shape))
-    model.add(Activation('relu'))
+    model.add(Conv2D(32, (3, 3), input_shape=input_shape))
     model.add(Conv2D(64, (3, 3)))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.add(Conv2D(128, (3, 3)))
+    model.add(Conv2D(32, (5, 5)))
+    # model.add(Conv2D(64, (5, 5)))
     model.add(Activation('relu'))
-    model.add(Conv2D(128, (3, 3)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(MaxPooling2D(pool_size=(4, 4)))
 
-    model.add(Conv2D(256, (3, 3)))
+    model.add(Conv2D(64, (3, 3)))
+    model.add(Conv2D(64, (2, 2)))
     model.add(Activation('relu'))
-    model.add(Conv2D(256, (3, 3)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(MaxPooling2D(pool_size=(3, 3)))
 
     # The classifying part of the model
     model.add(Flatten())
-    model.add(Dense(256))
+    model.add(Dense(256, kernel_regularizer= regularizers.l2(0.1)))
     model.add(Activation('relu'))
     model.add(Dropout(0.5)) # This dropout insures that 50% of the connections are closed each time, in order to counter overfitting.
-    model.add(Dense(4)) # the model is closed off with a 4 dense layer, corresponding to the 4 different classes.
+    model.add(Dense(4, kernel_regularizer= regularizers.l2(0.1))) # the model is closed off with a 4 dense layer, corresponding to the 4 different classes.
     model.add(Activation('softmax')) #
 
-    #
+
+
     model.compile(loss='categorical_crossentropy',optimizer= optimizers.adam(lr=1e-4),metrics=['accuracy']
                   )
     return model
@@ -112,7 +113,7 @@ def trainModel(model):
     )
 
     plotVal_plotLoss(hist)
-    model.save_weights('fourth_try.h5') # Saving the compile weights
+    model.save_weights('custom_w_supervision_try.h5') # Saving the compile weights
 
 
 # This function c
@@ -164,13 +165,13 @@ def plotVal_plotLoss (model) :
     plt.show()
 
 
-#trainModel(compileModel())
+trainModel(compileModel())
 
 #np.set_printoptions(suppress=True)
 #model = compileModel()
 np.set_printoptions(suppress=True, precision=3)
 model = compileModel()
-model.load_weights('fourth_try.h5')
+model.load_weights('custom_w_supervision_try.h5')
 
 ####### Random images #######
 predictImg(prediction_data_dir + '/hud.PNG', model)
