@@ -31,8 +31,8 @@ epochs = 100
 batch_size = 12 # The batch size represents the total amount of pictures that are included in each iteration.
 
 
-best_model = keras.callbacks.ModelCheckpoint('custom_w_supervision_try' + '.h5', monitor='val_acc',save_best_only=True)
-reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='loss',factor=0.25, patience=20,min_lr=0.000005)
+best_model = keras.callbacks.ModelCheckpoint('custom_w_supervision_try2_best' + '.h5', monitor='val_acc',save_best_only=True)
+reduce_lr = keras.callbacks.ReduceLROnPlateau(monitor='loss',factor=0.25, patience=5,min_lr=0.000005)
 
 def compileModel():
     print("compiling model")
@@ -109,11 +109,12 @@ def trainModel(model):
         steps_per_epoch=nb_train_samples // batch_size, # The accumulated amount of steps
         epochs=epochs,
         validation_data=validation_generator,
-        nb_val_samples=50
+        nb_val_samples=50,
+        callbacks=[best_model, reduce_lr]
     )
 
     plotVal_plotLoss(hist)
-    model.save_weights('custom_w_supervision_try.h5') # Saving the compile weights
+    model.save_weights('custom_w_supervision_try2.h5') # Saving the compile weights
 
 
 # This function c
@@ -152,7 +153,7 @@ def plotVal_plotLoss (model) :
     plt.ylabel('accuracy')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
-    plt.savefig('loss_plot_4 (simulated vgg1)')
+    plt.savefig('loss_plot_4 (simulated vgg1)2')
     plt.show()
 
     plt.plot(model.history['loss'])
@@ -161,7 +162,7 @@ def plotVal_plotLoss (model) :
     plt.ylabel('loss')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
-    plt.savefig('loss_plot_4 (simulated vgg1)')
+    plt.savefig('loss_plot_4 (simulated vgg1)2')
     plt.show()
 
 
@@ -171,9 +172,9 @@ trainModel(compileModel())
 #model = compileModel()
 np.set_printoptions(suppress=True, precision=3)
 model = compileModel()
-model.load_weights('custom_w_supervision_try.h5')
+model.load_weights('custom_w_supervision_try2_best.h5')
 
-#predictImg(prediction_data_dir + '/hud.PNG', model) #  ansigt
+predictImg(prediction_data_dir + '/hud.PNG', model) #  ansigt
 predictImg(prediction_data_dir + '/ikke-gun.jpg', model) # ansigter
 
 
@@ -186,7 +187,5 @@ predictImg(prediction_data_dir + '/gun_u_hand.jpg', model) # Gun
 
 predictImg(prediction_data_dir + '/rifleman.jpg', model) # Rifle
 predictImg(prediction_data_dir + '/rifle.jpeg', model) # Rifle
-
-
 
 
