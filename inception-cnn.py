@@ -159,8 +159,6 @@ predictImg(prediction_data_dir + '/ikke-gun.jpg', model) # ansigter
 
 
 predictImg(prediction_data_dir + '/59kspz.jpg', model) # Knife
-predictImg(prediction_data_dir + '/standart_knive.jpg', model) # knive
-predictImg(prediction_data_dir + '/hunter_knive.jpg', model) # knive
 predictImg(prediction_data_dir + '/knive_m_hand.png', model) # knive
 
 predictImg(prediction_data_dir + '/gun_m_hand.jpg', model) # Gun
@@ -169,12 +167,6 @@ predictImg(prediction_data_dir + '/gun_u_hand.jpg', model) # Gun
 
 predictImg(prediction_data_dir + '/rifleman.jpg', model) # Rifle
 predictImg(prediction_data_dir + '/rifle.jpeg', model) # Rifle
-predictImg(prediction_data_dir + '/ak_rifle.jpg', model) # Rifle
-predictImg(prediction_data_dir + '/rifle_m_man.jpg', model) # Rifle
-
-predictImg(prediction_data_dir + '/rifle_m_man.jpg', model) # Rifle
-
-predictImg(prediction_data_dir + '/IMG_9186.JPG', model) # Rifle
 
 
 np.set_printoptions(suppress=False, precision=10)

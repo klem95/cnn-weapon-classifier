@@ -173,25 +173,19 @@ np.set_printoptions(suppress=True, precision=3)
 model = compileModel()
 model.load_weights('custom_w_supervision_try.h5')
 
-####### Random images #######
-predictImg(prediction_data_dir + '/hud.PNG', model)
-predictImg(prediction_data_dir + '/ikke-gun.jpg', model)
+#predictImg(prediction_data_dir + '/hud.PNG', model) #  ansigt
+predictImg(prediction_data_dir + '/ikke-gun.jpg', model) # ansigter
 
-#######  Images of rifles #######
-predictImg(prediction_data_dir + '/rifle.jpeg', model)
-predictImg(prediction_data_dir + '/ak_rifle.jpg', model)
-predictImg(prediction_data_dir + '/rifle_m_man.jpg', model)
 
-#######  Images of handguns #######
-predictImg(prediction_data_dir + '/gun_m_hand.jpg', model)
-predictImg(prediction_data_dir + '/gun_u_hand.jpg', model)
+predictImg(prediction_data_dir + '/59kspz.jpg', model) # Knife
+predictImg(prediction_data_dir + '/knive_m_hand.png', model) # knive
 
-#######  Images of knives #######
-predictImg(prediction_data_dir + '/standart_knive.jpg', model)
-predictImg(prediction_data_dir + '/hunter_knive.jpg', model)
-predictImg(prediction_data_dir + '/knive_m_hand.png', model)
-predictImg(prediction_data_dir + '/59kspz.jpg', model)
+predictImg(prediction_data_dir + '/gun_m_hand.jpg', model) # Gun
+predictImg(prediction_data_dir + '/gun_u_hand.jpg', model) # Gun
 
+
+predictImg(prediction_data_dir + '/rifleman.jpg', model) # Rifle
+predictImg(prediction_data_dir + '/rifle.jpeg', model) # Rifle
 
 
 
